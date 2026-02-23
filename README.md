@@ -42,84 +42,34 @@ Utilisateur ──< Reservation >── Salle
 
 ### Entity Relationship Diagram
 
-```mermaid
-classDiagram
-    direction TB
+<img width="845" height="682" alt="diagramme de class" src="https://github.com/user-attachments/assets/b85df34e-6290-464f-bb8c-436d0e020021" />
 
-    class Utilisateur {
-        +Long id
-        +String nom
-        +String prenom
-        +String email
-        +List~Reservation~ reservations
-    }
 
-    class Reservation {
-        +Long id
-        +LocalDateTime dateDebut
-        +LocalDateTime dateFin
-        +String motif
-        +Utilisateur utilisateur
-        +Salle salle
-    }
-
-    class Salle {
-        +Long id
-        +String nom
-        +Integer capacite
-        +String description
-        +List~Reservation~ reservations
-        +Set~Equipement~ equipements
-    }
-
-    class Equipement {
-        +Long id
-        +String nom
-        +String description
-        +Set~Salle~ salles
-    }
-
-    Utilisateur "1" --> "0..*" Reservation : fait
-    Salle "1" --> "0..*" Reservation : accueille
-    Salle "0..*" --> "0..*" Equipement : possède
-```
 
 ---
 
 ## 🔗 JPA Relationships Covered
 
-### `@OneToMany` / `@ManyToOne` — Utilisateur & Reservation
-- `Utilisateur` → `Reservation` : one user can have many reservations
-- `Reservation` holds the FK (`utilisateur_id`) — it's the **owner**
-- `orphanRemoval = true` on `Utilisateur`: removing a reservation from the list deletes it from the DB
+Utilisateur & Reservation
 
-### `@OneToMany` / `@ManyToOne` — Salle & Reservation
-- `Salle` → `Reservation` : one room can have many reservations
-- `Reservation` holds the FK (`salle_id`) — it's the **owner**
-- `CascadeType.ALL` on `Salle`: operations on a room cascade to its reservations
+One user can make many reservations.
+Each reservation belongs to one user.
+Reservation stores the user ID.
 
-### `@ManyToMany` — Salle & Equipement
-- A room can have multiple pieces of equipment, and equipment can be in multiple rooms
-- `Salle` is the **owner** — it has `@JoinTable(name = "salle_equipement")`
-- `Equipement` has `mappedBy = "equipements"` — it's the **inverse**
-- Cascade: `PERSIST` + `MERGE` only (no `REMOVE` — deleting a room won't delete the equipment)
+Salle & Reservation
 
----
+One room can have many reservations.
+Each reservation is for one room.
+Reservation stores the room ID.
 
-## ✅ Test Scenarios (`App.java`)
+Salle & Equipement
 
-The `main` method runs three automated test scenarios:
-
-**1. `testRelationsEtCascade`**
-Creates a `Utilisateur`, a `Salle`, and a `Reservation`, links them using helper methods, and verifies that cascade persist works correctly.
-
-**2. `testSuppressionOrpheline`**
-Creates a user with two reservations, removes one from the collection, and verifies that `orphanRemoval = true` automatically deletes it from the database.
-
-**3. `testRelationManyToMany`**
-Creates rooms and equipment, links them via `addEquipement()`, then removes a link and verifies the equipment entity itself is **not** deleted (no cascade remove on ManyToMany).
+A room can have many equipment items.
+Equipment can be in many rooms.
+There is a join table between them.
 
 ---
+
 
 ## 🛠️ Tech Stack
 
@@ -142,17 +92,6 @@ Creates rooms and equipment, links them via `addEquipement()`, then removes a li
 - Maven 3.x
 
 ### Run the project
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/gestion-reservations.git
-cd gestion-reservations
-
-# Build and run
-mvn compile exec:java -Dexec.mainClass="com.example.App"
-```
-
-The H2 database is **in-memory** — no setup needed. Tables are created and dropped automatically on each run (`hbm2ddl.auto=create-drop`).
 
 ---
 
